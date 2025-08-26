@@ -14,6 +14,7 @@ import { createPremiumInfoTool } from "./tools/premium-info.js";
 import { createDeliverySlotsTool } from "./tools/delivery-slots.js";
 import { createAnnouncementsTool } from "./tools/announcements.js";
 import { createReusableBagsTool } from "./tools/reusable-bags.js";
+import { createOrderDetailTool } from "./tools/order-detail.js";
 
 const server = new McpServer(
   {
@@ -55,6 +56,7 @@ const premiumInfo = createPremiumInfoTool(createRohlikAPI);
 const deliverySlots = createDeliverySlotsTool(createRohlikAPI);
 const announcements = createAnnouncementsTool(createRohlikAPI);
 const reusableBags = createReusableBagsTool(createRohlikAPI);
+const orderDetail = createOrderDetailTool(createRohlikAPI);
 
 // Core functionality
 server.registerTool(searchProducts.name, searchProducts.definition, searchProducts.handler);
@@ -66,6 +68,7 @@ server.registerTool(accountData.name, accountData.definition, accountData.handle
 
 // Order management
 server.registerTool(orderHistory.name, orderHistory.definition, orderHistory.handler);
+server.registerTool(orderDetail.name, orderDetail.definition, orderDetail.handler);
 server.registerTool(upcomingOrders.name, upcomingOrders.definition, upcomingOrders.handler);
 
 // Delivery management

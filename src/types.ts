@@ -46,6 +46,30 @@ export interface RohlikAPIResponse<T = any> {
   messages?: Array<{ content: string }>;
 }
 
+export interface OrderProduct {
+  id?: string;
+  productId?: string;
+  productName?: string;
+  name?: string;
+  quantity?: number;
+  price?: number;
+  totalPrice?: number;
+  brand?: string;
+}
+
+export interface OrderDetail {
+  id?: string;
+  orderNumber?: string;
+  status?: string;
+  createdAt?: string;
+  deliveredAt?: string;
+  deliveryDate?: string;
+  totalPrice?: number;
+  price?: number;
+  products?: OrderProduct[];
+  items?: OrderProduct[];
+}
+
 export interface AccountData {
   login?: any;
   delivery?: any;

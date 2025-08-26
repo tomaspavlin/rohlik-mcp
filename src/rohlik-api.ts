@@ -370,4 +370,15 @@ export class RohlikAPI {
       await this.logout();
     }
   }
+
+  async getOrderDetail(orderId: string): Promise<any> {
+    await this.login();
+
+    try {
+      const response = await this.makeRequest<any>(`/api/v3/orders/${orderId}`);
+      return response.data || response;
+    } finally {
+      await this.logout();
+    }
+  }
 }
