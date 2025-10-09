@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tomaspavlin-rohlik-mcp-badge.png)](https://mseep.ai/app/tomaspavlin-rohlik-mcp)
+
 # <img src="https://www.rohlik.cz/favicon/cz/favicon.ico" alt="Rohlik" width="30" height="30"> Rohlik MCP Server
 
 **Enhance your favourite LLM with capabilities to buy groceries.**
