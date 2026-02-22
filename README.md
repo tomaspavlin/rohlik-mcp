@@ -225,6 +225,10 @@ The validator automatically loads credentials from your Claude Desktop config or
 
 ### Common Issues
 
+#### Claude Desktop does not see the MCP server (on Windows)
+
+For your config file, instead of `%APPDATA%/Claude/claude_desktop_config.json` use `C:\Users\[YOUR WINDOWS USER]\AppData\Local\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json`
+
 #### "Login failed" Error
 
 **Possible causes:**
@@ -270,7 +274,7 @@ The validator automatically loads credentials from your Claude Desktop config or
 
 #### Server fails with `spawn npx ENOENT`
 
-Under Claude Desktop, failse with:
+Under Claude Desktop, fails with:
 ```shell
 spawn npx ENOENT
 Server disconnected. Transport closed unexpectedly.
