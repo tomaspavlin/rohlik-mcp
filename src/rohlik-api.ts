@@ -486,6 +486,7 @@ export class RohlikAPI {
   }
 
   async getDiscountedProducts(
+    saleType: string = 'sales',
     categoryId: number | null = null,
     page: number = 0,
     size: number = 14,
@@ -505,7 +506,7 @@ export class RohlikAPI {
       });
 
       const listResponse = await this.makeRequest<any>(
-        `/api/v1/categories/sales${categoryPath}/products?${listParams}`
+        `/api/v1/categories/${saleType}${categoryPath}/products?${listParams}`
       );
 
       const data = listResponse as any;
@@ -520,7 +521,7 @@ export class RohlikAPI {
       for (const id of productIds) {
         cardParams.append('products', String(id));
       }
-      cardParams.append('categoryType', 'sales');
+      cardParams.append('categoryType', saleType);
 
       const cardResponse = await this.makeRequest<any>(
         `/api/v1/products/card?${cardParams}`
