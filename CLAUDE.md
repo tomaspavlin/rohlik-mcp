@@ -24,7 +24,8 @@ src/
     ├── reusable-bags.ts
     ├── frequent-items.ts      # Analyze purchase patterns
     ├── meal-suggestions.ts    # Data-driven meal shopping
-    └── shopping-scenarios.ts  # User help guide
+    ├── shopping-scenarios.ts  # User help guide
+    └── discounted-items.ts    # Browse current sales/deals
 
 tests/
 ├── README.md             # Comprehensive testing guide
@@ -40,9 +41,10 @@ tests/
 - `ROHLIK_BASE_URL` - Service URL (optional, defaults to rohlik.cz)
 - `ROHLIK_DEBUG` - Enable debug logging (optional, set to "true")
 
-## Available Tools (16 total)
+## Available Tools (17 total)
 **Smart Shopping:** get_meal_suggestions, get_frequent_items, get_shopping_scenarios
 **Core Shopping:** search_products, add_to_cart, get_cart_content, remove_from_cart, get_shopping_list
+**Deals & Discounts:** get_discounted_items
 **Order Management:** get_account_data, get_order_history, get_order_detail, get_upcoming_orders
 **Delivery:** get_delivery_info, get_delivery_slots
 **Account:** get_premium_info, get_announcements, get_reusable_bags_info

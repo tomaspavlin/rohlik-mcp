@@ -452,6 +452,86 @@ export class RohlikAPI {
     }
   }
 
+  async getSalesCategories(): Promise<{ id: number; name: string; slug: string }[]> {
+    await this.login();
+
+    try {
+      // Get subcategory IDs
+      const subResponse = await this.makeRequest<any>('/api/v1/categories/sales/subcategories');
+      const subData = subResponse as any;
+      const categoryIds: number[] = subData.categoryIds || [];
+
+      if (categoryIds.length === 0) {
+        return [];
+      }
+
+      // Get category names
+      const params = new URLSearchParams();
+      for (const id of categoryIds) {
+        params.append('categories', String(id));
+      }
+      params.append('type', 'favorite-sales');
+
+      const catResponse = await this.makeRequest<any>(`/api/v1/categories?${params}`);
+      const categories = Array.isArray(catResponse) ? catResponse : [];
+
+      return categories.map((c: any) => ({
+        id: c.categoryId,
+        name: c.name,
+        slug: c.slug
+      }));
+    } finally {
+      await this.logout();
+    }
+  }
+
+  async getDiscountedProducts(
+    categoryId: number | null = null,
+    page: number = 0,
+    size: number = 14,
+    sort: string = 'recommended'
+  ): Promise<any[]> {
+    await this.login();
+
+    try {
+      // Step 1: Get product IDs for the sales category
+      const categoryPath = categoryId ? `/${categoryId}` : '';
+      const listParams = new URLSearchParams({
+        page: String(page),
+        size: String(size),
+        sort,
+        filter: '',
+        excludeProductIds: ''
+      });
+
+      const listResponse = await this.makeRequest<any>(
+        `/api/v1/categories/sales${categoryPath}/products?${listParams}`
+      );
+
+      const data = listResponse as any;
+      const productIds: number[] = data.productIds || [];
+
+      if (productIds.length === 0) {
+        return [];
+      }
+
+      // Step 2: Get product card details
+      const cardParams = new URLSearchParams();
+      for (const id of productIds) {
+        cardParams.append('products', String(id));
+      }
+      cardParams.append('categoryType', 'sales');
+
+      const cardResponse = await this.makeRequest<any>(
+        `/api/v1/products/card?${cardParams}`
+      );
+
+      return Array.isArray(cardResponse) ? cardResponse : [];
+    } finally {
+      await this.logout();
+    }
+  }
+
   async getOrderDetail(orderId: string): Promise<any> {
     await this.login();
 

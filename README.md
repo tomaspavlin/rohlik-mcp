@@ -33,6 +33,9 @@ Example LLM prompts that work very well with the Rohlik MCP:
 - *"Show my top 20 most purchased items"*
 - *"What can I do with Rohlik MCP?"*
 
+**💰 Deals & Discounts:**
+- *What's on sale this week?*
+
 **📅 Planning:**
 - *What are the cheapest delivery slots for tomorrow?*
 - *When is my next delivery?*
@@ -95,6 +98,9 @@ If `ROHLIK_BASE_URL` is not specified, it defaults to the Czech version.
 - `get_meal_suggestions` - Get personalized suggestions for breakfast, lunch, dinner, snacks, baking, drinks, or healthy eating based on your order history
 - `get_frequent_items` - Analyze order history to find most frequently purchased items (overall + per category)
 - `get_shopping_scenarios` - Interactive guide showing what you can do with the MCP
+
+### Deals & Discounts
+- `get_discounted_items` - Browse currently discounted items (cenové trháky), optionally filtered by food category, with sorting and pagination
 
 ### Getting info
 - `get_account_data` - Get comprehensive account information including delivery details, orders, announcements, cart, and premium status

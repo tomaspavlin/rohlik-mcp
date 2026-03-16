@@ -18,6 +18,7 @@ import { createOrderDetailTool } from "./tools/order-detail.js";
 import { createFrequentItemsTool } from "./tools/frequent-items.js";
 import { createMealSuggestionsTool } from "./tools/meal-suggestions.js";
 import { createShoppingScenariosTool } from "./tools/shopping-scenarios.js";
+import { createDiscountedItemsTool } from "./tools/discounted-items.js";
 
 const server = new McpServer(
   {
@@ -63,6 +64,7 @@ const orderDetail = createOrderDetailTool(createRohlikAPI);
 const frequentItems = createFrequentItemsTool(createRohlikAPI);
 const mealSuggestions = createMealSuggestionsTool(createRohlikAPI);
 const shoppingScenarios = createShoppingScenariosTool();
+const discountedItems = createDiscountedItemsTool(createRohlikAPI);
 
 // Core functionality
 server.registerTool(searchProducts.name, searchProducts.definition, searchProducts.handler);
@@ -90,6 +92,9 @@ server.registerTool(reusableBags.name, reusableBags.definition, reusableBags.han
 server.registerTool(frequentItems.name, frequentItems.definition, frequentItems.handler);
 server.registerTool(mealSuggestions.name, mealSuggestions.definition, mealSuggestions.handler);
 server.registerTool(shoppingScenarios.name, shoppingScenarios.definition, shoppingScenarios.handler);
+
+// Deals & discounts
+server.registerTool(discountedItems.name, discountedItems.definition, discountedItems.handler);
 
 async function main() {
   const transport = new StdioServerTransport();
