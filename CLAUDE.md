@@ -69,6 +69,7 @@ tests/
 - `npm run validate-api` - Integration tests for API endpoints
 
 ## Testing
+- **`/test-mcp` skill** - Use this skill whenever you need to investigate what an API endpoint returns, verify tool field mappings, debug tool output, or test changes. It lets you call the API directly via `node --env-file=.env` without needing the user to run the Inspector.
 - **Unit tests** - Test data transformation logic in smart shopping features (frequent-items, meal-suggestions)
 - **Integration tests** - Validate all API endpoints against real Rohlik API
 - **Test helpers** - Mock data generators for consistent test data
