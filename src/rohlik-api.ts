@@ -194,13 +194,23 @@ export class RohlikAPI {
       // Limit results
       products = products.slice(0, limit);
 
-      return products.map((p: any) => ({
-        id: p.productId,
-        name: p.productName,
-        price: `${p.price.full} ${p.price.currency}`,
-        brand: p.brand,
-        amount: p.textualAmount
-      }));
+      return products.map((p: any) => {
+        const activeSale = p.sales?.find((s: any) => s.active);
+        const result: any = {
+          id: p.productId,
+          name: p.productName,
+          price: `${p.price.full} ${p.price.currency}`,
+          brand: p.brand,
+          amount: p.textualAmount
+        };
+        if (activeSale) {
+          result.salePrice = `${activeSale.price.full} ${activeSale.price.currency}`;
+          result.originalPrice = `${activeSale.originalPrice.full} ${activeSale.originalPrice.currency}`;
+          result.discountPercentage = activeSale.discountPercentage;
+          result.saleType = activeSale.type;
+        }
+        return result;
+      });
     } finally {
       await this.logout();
     }

@@ -21,9 +21,12 @@ export function createSearchProductsTool(createRohlikAPI: () => RohlikAPI) {
         const results = await api.searchProducts(product_name, limit, favourite_only);
 
         const output = `Found ${results.length} products:\n\n` +
-          results.map(product => 
-            `• ${product.name} (${product.brand})\n  Price: ${product.price}\n  Amount: ${product.amount}\n  ID: ${product.id}`
-          ).join('\n\n');
+          results.map((product: any) => {
+            const priceInfo = product.salePrice
+              ? `Price: ${product.salePrice} (was ${product.originalPrice}, -${product.discountPercentage}%)`
+              : `Price: ${product.price}`;
+            return `• ${product.name} (${product.brand})\n  ${priceInfo}\n  Amount: ${product.amount}\n  ID: ${product.id}`;
+          }).join('\n\n');
 
         return {
           content: [
