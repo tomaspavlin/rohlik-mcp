@@ -338,7 +338,18 @@ This will:
 ### Publishing as NPM package
 
 1. Update version in package.json
-2. `npm publish`
+  ```bash
+  # Patch: 3.1.1 → 3.1.2                                               
+  npm version patch                                                    
+                                                                       
+  # Minor: 3.1.1 → 3.2.0                                               
+  npm version minor                              
+                                                 
+  # Major: 3.1.1 → 4.0.0
+  npm version major
+
+  ```
+2. `npm publish --access public`
 
 ## License
 
