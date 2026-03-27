@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 export const ProductSchema = z.object({
   product_id: z.number(),
-  quantity: z.number().min(1)
+  quantity: z.number().min(1),
+  action_id: z.number().optional()
 });
 
 export const SearchResultSchema = z.object({

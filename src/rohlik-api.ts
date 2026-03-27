@@ -225,7 +225,7 @@ export class RohlikAPI {
       for (const product of products) {
         try {
           const payload = {
-            actionId: null,
+            actionId: product.action_id || null,
             productId: product.product_id,
             quantity: product.quantity,
             recipeId: null,
@@ -552,5 +552,26 @@ export class RohlikAPI {
     } finally {
       await this.logout();
     }
+  }
+
+  async getProductComposition(productIds: number[]): Promise<any[]> {
+    const params = new URLSearchParams();
+    for (const id of productIds) {
+      params.append('products', String(id));
+    }
+
+    const response = await fetch(`${BASE_URL}/api/v1/products/composition?${params}`, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    });
+
+    if (!response.ok) {
+      throw new RohlikAPIError(`HTTP ${response.status}: ${response.statusText}`, response.status);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : [data];
   }
 }
