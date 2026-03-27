@@ -49,6 +49,8 @@ export class RohlikAPI {
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
       'Referer': BASE_URL,
       'Origin': BASE_URL,
+      'rhl-email': this.credentials.username,
+      'rhl-pass': this.credentials.password,
       'sec-ch-ua': '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
       'sec-ch-ua-mobile': '?0',
       'sec-ch-ua-platform': '"macOS"',
@@ -78,86 +80,24 @@ export class RohlikAPI {
   }
 
   async login(): Promise<void> {
-    const loginData = {
-      email: this.credentials.username,
-      password: this.credentials.password,
-      name: ''
-    };
-
-    const debug = process.env.ROHLIK_DEBUG === 'true';
-
-    try {
-      const response = await this.makeRequest<any>('/services/frontend-service/login', {
-        method: 'POST',
-        body: JSON.stringify(loginData)
-      });
-
-      if (debug) {
-        console.error('[ROHLIK_DEBUG] Login response:', JSON.stringify(response, null, 2));
+    // Auth is handled via rhl-email/rhl-pass headers on every request.
+    // No explicit login needed — the headers authenticate each call.
+    // Fetch userId/addressId lazily for endpoints that need them.
+    if (!this.userId) {
+      try {
+        const response = await this.makeRequest<any>('/services/frontend-service/user');
+        const user = response.data?.user;
+        const address = response.data?.address;
+        if (user?.id) this.userId = user.id;
+        if (address?.id) this.addressId = address.id;
+      } catch {
+        // Non-fatal: some endpoints work without userId/addressId
       }
-
-      // Check for various error response formats
-      // Accept both 200 (OK) and 202 (Accepted) as successful responses
-      const isSuccess = response.status === 200 || response.status === 202 || response.status === undefined;
-
-      if (!isSuccess) {
-        if (response.status === 401 || response.status === 403) {
-          throw new RohlikAPIError('Invalid credentials - please check your username and password', response.status);
-        }
-
-        // Try to extract error message from various possible locations
-        const responseAny = response as any;
-        const errorMessage =
-          response.messages?.[0]?.content ||
-          responseAny.message ||
-          responseAny.error ||
-          `Login failed with status ${response.status}`;
-
-        if (debug) {
-          console.error('[ROHLIK_DEBUG] Login failed:', errorMessage);
-        }
-
-        throw new RohlikAPIError(`Login failed: ${errorMessage}`, response.status);
-      }
-
-      // Verify we have user data
-      if (!response.data?.user?.id) {
-        if (debug) {
-          console.error('[ROHLIK_DEBUG] No user ID in response. Full response:', JSON.stringify(response, null, 2));
-        }
-        throw new RohlikAPIError('Login succeeded but no user data received. Please check credentials and try again.');
-      }
-
-      this.userId = response.data.user.id;
-      this.addressId = response.data?.address?.id;
-
-      if (debug) {
-        console.error(`[ROHLIK_DEBUG] Login successful. User ID: ${this.userId}, Address ID: ${this.addressId}`);
-      }
-    } catch (error) {
-      if (error instanceof RohlikAPIError) {
-        throw error;
-      }
-
-      // Log the full error for debugging
-      if (debug) {
-        console.error('[ROHLIK_DEBUG] Login error:', error);
-      }
-
-      // Handle network or other errors
-      if (error instanceof Error) {
-        throw new RohlikAPIError(`Login failed: ${error.message}`);
-      }
-
-      throw new RohlikAPIError('Login failed: Unknown error occurred');
     }
   }
 
   async logout(): Promise<void> {
-    await this.makeRequest('/services/frontend-service/logout', {
-      method: 'POST'
-    });
-    this.sessionCookies = '';
+    // No-op: header-based auth doesn't require logout.
   }
 
   async searchProducts(
