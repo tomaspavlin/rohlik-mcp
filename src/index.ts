@@ -44,9 +44,13 @@ function getCredentials() {
   return { username, password };
 }
 
+let _apiInstance: RohlikAPI | null = null;
+
 function createRohlikAPI() {
-  const credentials = getCredentials();
-  return new RohlikAPI(credentials);
+  if (!_apiInstance) {
+    _apiInstance = new RohlikAPI(getCredentials());
+  }
+  return _apiInstance;
 }
 
 // Register all tools
