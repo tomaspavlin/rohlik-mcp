@@ -35,6 +35,8 @@ Example LLM prompts that work very well with the Rohlik MCP:
 
 **💰 Deals & Discounts:**
 - *What's on sale this week?*
+- *Show me zachráň a ušetři items — anything good expiring soon?*
+- *Add that discounted chicken to cart at the sale price*
 
 **📅 Planning:**
 - *What are the cheapest delivery slots for tomorrow?*
@@ -89,7 +91,7 @@ If `ROHLIK_BASE_URL` is not specified, it defaults to the Czech version.
 
 ### Core Shopping
 - `search_products` - Search for grocery products by name with filtering options
-- `add_to_cart` - Add multiple products to your shopping cart
+- `add_to_cart` - Add multiple products to your shopping cart. Supports optional `action_id` parameter — pass the `saleId` from discounted items to apply sale/zachráň prices.
 - `get_cart_content` - View current cart contents and totals
 - `remove_from_cart` - Remove items from your shopping cart
 - `get_shopping_list` - Retrieve shopping lists by ID
@@ -100,7 +102,10 @@ If `ROHLIK_BASE_URL` is not specified, it defaults to the Czech version.
 - `get_shopping_scenarios` - Interactive guide showing what you can do with the MCP
 
 ### Deals & Discounts
-- `get_discounted_items` - Browse currently discounted items (cenové trháky), optionally filtered by food category, with sorting and pagination
+- `get_discounted_items` - Browse discounted items by sale type: `sales` (cenové trháky), `last-minute` (zachráň a ušetři — expiring food at reduced prices), `week-sales`, `multipack`, `bundles`, `premium-sales`, `favorite-sales`. Returns `saleId` per product — pass it as `action_id` to `add_to_cart` to get the discounted price.
+
+### Product Info
+- `get_product_composition` - Get allergen, ingredient, and nutritional data for one or more products. No authentication required. Useful for dietary checks (gluten, eggs, nuts, etc.) before adding to cart.
 
 ### Getting info
 - `get_account_data` - Get comprehensive account information including delivery details, orders, announcements, cart, and premium status
@@ -236,6 +241,8 @@ The validator automatically loads credentials from your Claude Desktop config or
 For your config file, instead of `%APPDATA%/Claude/claude_desktop_config.json` use `C:\Users\[YOUR WINDOWS USER]\AppData\Local\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json`
 
 #### "Login failed" Error
+
+Authentication uses `rhl-email` and `rhl-pass` headers on every API request (no session-based login). If you get auth errors:
 
 **Possible causes:**
 1. Wrong username/password in configuration
