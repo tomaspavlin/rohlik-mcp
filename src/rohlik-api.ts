@@ -49,8 +49,6 @@ export class RohlikAPI {
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
       'Referer': BASE_URL,
       'Origin': BASE_URL,
-      'rhl-email': this.credentials.username,
-      'rhl-pass': this.credentials.password,
       'sec-ch-ua': '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
       'sec-ch-ua-mobile': '?0',
       'sec-ch-ua-platform': '"macOS"',
@@ -80,24 +78,31 @@ export class RohlikAPI {
   }
 
   async login(): Promise<void> {
-    // Auth is handled via rhl-email/rhl-pass headers on every request.
-    // No explicit login needed — the headers authenticate each call.
-    // Fetch userId/addressId lazily for endpoints that need them.
-    if (!this.userId) {
+    if (this.sessionCookies) return;
+
+    const response = await this.makeRequest<any>('/services/frontend-service/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: this.credentials.username,
+        password: this.credentials.password,
+        name: ''
+      })
+    });
+
+    if (response.data?.user?.id) {
+      this.userId = response.data.user.id;
+      this.addressId = response.data?.address?.id;
+    } else if (!this.userId) {
       try {
-        const response = await this.makeRequest<any>('/services/frontend-service/user');
-        const user = response.data?.user;
-        const address = response.data?.address;
-        if (user?.id) this.userId = user.id;
-        if (address?.id) this.addressId = address.id;
-      } catch {
-        // Non-fatal: some endpoints work without userId/addressId
-      }
+        const userResp = await this.makeRequest<any>('/services/frontend-service/user');
+        if (userResp.data?.user?.id) this.userId = userResp.data.user.id;
+        if (userResp.data?.address?.id) this.addressId = userResp.data.address.id;
+      } catch { /* non-fatal */ }
     }
   }
 
   async logout(): Promise<void> {
-    // No-op: header-based auth doesn't require logout.
+    // No-op: keep session alive across tool calls (singleton pattern).
   }
 
   async searchProducts(

@@ -8,7 +8,7 @@ export function createCartManagementTools(createRohlikAPI: () => RohlikAPI) {
       name: "add_to_cart",
       definition: {
         title: "Add to Cart",
-        description: "Add products to the shopping cart. For discounted items (from get_discounted_items), pass the saleId as action_id to get the sale price applied.",
+        description: "Add products to the shopping cart. Each item requires product_id and quantity. Optionally pass action_id (the saleId from get_discounted_items) alongside product_id to apply the discounted/zachráň price.",
         inputSchema: {
           products: z.array(z.object({
             product_id: z.number().describe("The ID of the product to add"),
