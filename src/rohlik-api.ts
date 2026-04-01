@@ -78,86 +78,31 @@ export class RohlikAPI {
   }
 
   async login(): Promise<void> {
-    const loginData = {
-      email: this.credentials.username,
-      password: this.credentials.password,
-      name: ''
-    };
+    if (this.sessionCookies) return;
 
-    const debug = process.env.ROHLIK_DEBUG === 'true';
+    const response = await this.makeRequest<any>('/services/frontend-service/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: this.credentials.username,
+        password: this.credentials.password,
+        name: ''
+      })
+    });
 
-    try {
-      const response = await this.makeRequest<any>('/services/frontend-service/login', {
-        method: 'POST',
-        body: JSON.stringify(loginData)
-      });
-
-      if (debug) {
-        console.error('[ROHLIK_DEBUG] Login response:', JSON.stringify(response, null, 2));
-      }
-
-      // Check for various error response formats
-      // Accept both 200 (OK) and 202 (Accepted) as successful responses
-      const isSuccess = response.status === 200 || response.status === 202 || response.status === undefined;
-
-      if (!isSuccess) {
-        if (response.status === 401 || response.status === 403) {
-          throw new RohlikAPIError('Invalid credentials - please check your username and password', response.status);
-        }
-
-        // Try to extract error message from various possible locations
-        const responseAny = response as any;
-        const errorMessage =
-          response.messages?.[0]?.content ||
-          responseAny.message ||
-          responseAny.error ||
-          `Login failed with status ${response.status}`;
-
-        if (debug) {
-          console.error('[ROHLIK_DEBUG] Login failed:', errorMessage);
-        }
-
-        throw new RohlikAPIError(`Login failed: ${errorMessage}`, response.status);
-      }
-
-      // Verify we have user data
-      if (!response.data?.user?.id) {
-        if (debug) {
-          console.error('[ROHLIK_DEBUG] No user ID in response. Full response:', JSON.stringify(response, null, 2));
-        }
-        throw new RohlikAPIError('Login succeeded but no user data received. Please check credentials and try again.');
-      }
-
+    if (response.data?.user?.id) {
       this.userId = response.data.user.id;
       this.addressId = response.data?.address?.id;
-
-      if (debug) {
-        console.error(`[ROHLIK_DEBUG] Login successful. User ID: ${this.userId}, Address ID: ${this.addressId}`);
-      }
-    } catch (error) {
-      if (error instanceof RohlikAPIError) {
-        throw error;
-      }
-
-      // Log the full error for debugging
-      if (debug) {
-        console.error('[ROHLIK_DEBUG] Login error:', error);
-      }
-
-      // Handle network or other errors
-      if (error instanceof Error) {
-        throw new RohlikAPIError(`Login failed: ${error.message}`);
-      }
-
-      throw new RohlikAPIError('Login failed: Unknown error occurred');
+    } else if (!this.userId) {
+      try {
+        const userResp = await this.makeRequest<any>('/services/frontend-service/user');
+        if (userResp.data?.user?.id) this.userId = userResp.data.user.id;
+        if (userResp.data?.address?.id) this.addressId = userResp.data.address.id;
+      } catch { /* non-fatal */ }
     }
   }
 
   async logout(): Promise<void> {
-    await this.makeRequest('/services/frontend-service/logout', {
-      method: 'POST'
-    });
-    this.sessionCookies = '';
+    // No-op: keep session alive across tool calls (singleton pattern).
   }
 
   async searchProducts(
@@ -225,7 +170,7 @@ export class RohlikAPI {
       for (const product of products) {
         try {
           const payload = {
-            actionId: null,
+            actionId: product.action_id || null,
             productId: product.product_id,
             quantity: product.quantity,
             recipeId: null,
@@ -552,5 +497,26 @@ export class RohlikAPI {
     } finally {
       await this.logout();
     }
+  }
+
+  async getProductComposition(productIds: number[]): Promise<any[]> {
+    const params = new URLSearchParams();
+    for (const id of productIds) {
+      params.append('products', String(id));
+    }
+
+    const response = await fetch(`${BASE_URL}/api/v1/products/composition?${params}`, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    });
+
+    if (!response.ok) {
+      throw new RohlikAPIError(`HTTP ${response.status}: ${response.statusText}`, response.status);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : [data];
   }
 }

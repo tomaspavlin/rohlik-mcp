@@ -6,9 +6,9 @@ export function createDiscountedItemsTool(createRohlikAPI: () => RohlikAPI) {
     name: "get_discounted_items",
     definition: {
       title: "Get Discounted Items",
-      description: "Get currently discounted items (cenové trháky / sales). Returns products on sale, optionally filtered by sale type and food category. Without a category, returns deals across all categories. Call with list_categories=true to see available category IDs. Recommended to use sale_type 'sales' and 'premium-sales' as default for best deals overview.",
+      description: "Get currently discounted items (cenové trháky / sales / zachráň a ušetři). Returns products on sale, optionally filtered by sale type and food category. Without a category, returns deals across all categories. Call with list_categories=true to see available category IDs. Use 'last-minute' for zachráň a ušetři (expiring food deals). Returns saleId for each product — pass it as action_id when adding to cart to get the discounted price.",
       inputSchema: {
-        sale_type: z.enum(["sales", "week-sales", "multipack", "bundles", "premium-sales", "favorite-sales"]).default("sales").describe("Type of sale/discount section. 'sales' = all deals (default), 'week-sales' = weekly deals (Akce týdne), 'multipack' = buy more pay less (Kup víc zaplať míň), 'bundles' = product bundles (Produktové balíčky), 'premium-sales' = exclusive deals for paid Xtra subscribers only (Exkluzivně pro Xtra), 'favorite-sales' = popular deals (Oblíbené v akci). Recommended: use 'sales' and 'premium-sales' for best overview."),
+        sale_type: z.enum(["sales", "week-sales", "multipack", "bundles", "premium-sales", "favorite-sales", "last-minute"]).default("sales").describe("Type of sale/discount section. 'sales' = all deals (default), 'week-sales' = weekly deals (Akce týdne), 'multipack' = buy more pay less (Kup víc zaplať míň), 'bundles' = product bundles (Produktové balíčky), 'premium-sales' = exclusive deals for paid Xtra subscribers only (Exkluzivně pro Xtra), 'favorite-sales' = popular deals (Oblíbené v akci), 'last-minute' = zachráň a ušetři / save food (expiring items at reduced prices). Recommended: use 'sales' and 'last-minute' for best overview."),
         category_id: z.number().optional().describe("Food category ID to filter by. Use list_categories=true first to see available categories and their IDs. If omitted, returns discounted items across all categories."),
         limit: z.number().min(1).max(50).default(14).describe("Maximum number of products to return (1-50, default: 14)"),
         page: z.number().min(0).default(0).describe("Page number for pagination (0-based, default: 0)"),
@@ -58,7 +58,8 @@ export function createDiscountedItemsTool(createRohlikAPI: () => RohlikAPI) {
           'multipack': 'multipack deals',
           'bundles': 'product bundles',
           'premium-sales': 'Xtra exclusive deals',
-          'favorite-sales': 'popular deals'
+          'favorite-sales': 'popular deals',
+          'last-minute': 'zachráň a ušetři (save food)'
         }[sale_type] || sale_type;
 
         const output = `Found ${products.length} ${saleLabel}${category_id ? ` in category ${category_id}` : ''} (page ${page}):\n\n` +
@@ -72,7 +73,9 @@ export function createDiscountedItemsTool(createRohlikAPI: () => RohlikAPI) {
               ? `Price: ${salePrice} (was ${originalPrice})`
               : `Price: ${price}`;
 
-            return `• ${p.name}${discount}\n  ${priceInfo}\n  Unit price: ${p.prices?.unitPrice || '?'} ${p.prices?.currency || ''}/${p.unit || 'unit'}\n  Amount: ${p.textualAmount || '?'}\n  ID: ${p.productId}`;
+            const saleId = p.prices?.saleId ? `\n  Sale ID: ${p.prices.saleId} (pass as action_id to add_to_cart for discounted price)` : '';
+
+            return `• ${p.name}${discount}\n  ${priceInfo}\n  Unit price: ${p.prices?.unitPrice || '?'} ${p.prices?.currency || ''}/${p.unit || 'unit'}\n  Amount: ${p.textualAmount || '?'}\n  ID: ${p.productId}${saleId}`;
           }).join('\n\n');
 
         return {
