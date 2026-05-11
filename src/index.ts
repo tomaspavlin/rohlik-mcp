@@ -19,6 +19,7 @@ import { createFrequentItemsTool } from "./tools/frequent-items.js";
 import { createMealSuggestionsTool } from "./tools/meal-suggestions.js";
 import { createShoppingScenariosTool } from "./tools/shopping-scenarios.js";
 import { createDiscountedItemsTool } from "./tools/discounted-items.js";
+import { createProductDetailTool } from "./tools/product-detail.js";
 
 const server = new McpServer(
   {
@@ -65,6 +66,7 @@ const frequentItems = createFrequentItemsTool(createRohlikAPI);
 const mealSuggestions = createMealSuggestionsTool(createRohlikAPI);
 const shoppingScenarios = createShoppingScenariosTool();
 const discountedItems = createDiscountedItemsTool(createRohlikAPI);
+const productDetail = createProductDetailTool(createRohlikAPI);
 
 // Core functionality
 server.registerTool(searchProducts.name, searchProducts.definition, searchProducts.handler);
@@ -95,6 +97,9 @@ server.registerTool(shoppingScenarios.name, shoppingScenarios.definition, shoppi
 
 // Deals & discounts
 server.registerTool(discountedItems.name, discountedItems.definition, discountedItems.handler);
+
+// Product detail (ingredients, composition, nutritional values)
+server.registerTool(productDetail.name, productDetail.definition, productDetail.handler);
 
 async function main() {
   const transport = new StdioServerTransport();
