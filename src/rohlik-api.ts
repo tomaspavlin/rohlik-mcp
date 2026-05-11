@@ -553,4 +553,24 @@ export class RohlikAPI {
       await this.logout();
     }
   }
+
+  async getProductDetail(productId: number | string): Promise<any> {
+    await this.login();
+
+    try {
+      // Basic product info (name, brand, country, slug, etc.)
+      const info = await this.makeRequest<any>(`/api/v1/products/${productId}`);
+      // Composition: ingredients + nutritional values + allergens
+      let composition: any = null;
+      try {
+        composition = await this.makeRequest<any>(`/api/v1/products/${productId}/composition`);
+      } catch (e) {
+        // some products (fresh produce etc.) have no composition data
+        composition = null;
+      }
+      return { info, composition };
+    } finally {
+      await this.logout();
+    }
+  }
 }
